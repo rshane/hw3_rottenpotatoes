@@ -35,7 +35,10 @@ Scenario: restrict to movies with 'PG' or 'R' ratings
   # enter step(s) to ensure that other movies are not visible
 
 Scenario: no ratings selected
-  # see assignment
-
+  # see assignment, don't need to do
+  
 Scenario: all ratings selected
   # see assignment
+  When I check all the ratings
+  And I press on the homepage "Refresh"
+  Then I should see all of the movies

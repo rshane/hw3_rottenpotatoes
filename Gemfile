@@ -14,7 +14,9 @@ group :development, :test do
   gem 'launchy'
 end
 group :test do
-  gem 'cucumber-rails'
+  gem 'autotest-rails'
+  gem 'spork-rails'
+  gem 'cucumber-rails', :require => false
   gem 'cucumber-rails-training-wheels'
 end
 group :production do

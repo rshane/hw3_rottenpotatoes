@@ -13,12 +13,11 @@ Given /the following movies exist/ do |movies_table|
 end
 
 # Make sure that one string (regexp) occurs before or after another one
-#   on the same page
-
+# on the same page
 Then /I should see "(.*)" before "(.*)"/ do |e1, e2|
-  #  ensure that that e1 occurs before e2.
-  #  page.content  is the entire content of the page as a string.
-  flunk "Unimplemented"
+ #  ensure that that e1 occurs before e2.
+ #  page.content  is the entire content of the page as a string.
+  assert page.body =~ /#{e1}.*#{e2}/m
 end
 
 # Make it easier to express checking or unchecking several boxes at once
@@ -40,28 +39,18 @@ When /I (un)?check the following ratings: (.*)/ do |uncheck, rating_list|
   end
 end
 
-
-Then /^the "([^"]*)" checkbox(?: within (.*))? should be checked$/ do |label, parent|
-  with_scope(parent) do
-    field_checked = find_field(label)['checked']
-    if field_checked.respond_to? :should
-      field_checked.should be_true
+When /I (un)?check all the ratings/ do |uncheck|
+  rating_list = Movie.find(:all, :select => 'rating', :group => 'rating').collect{|m| m.rating}
+  rating_list.each do |rating|
+    rating = 'ratings_' + rating
+    if uncheck
+      uncheck(rating)
     else
-      assert field_checked
+      check(rating)
     end
   end
 end
 
-Then /^the "([^"]*)" checkbox(?: within (.*))? should not be checked$/ do |label, parent|
-  with_scope(parent) do
-    field_checked = find_field(label)['checked']
-    if field_checked.respond_to? :should
-      field_checked.should be_false
-    else
-      assert !field_checked
-    end
-  end
-end
 
 Then /^(?:|I )should (not )?see the following movies: (.*)/ do |not_see, text|
   movie_list = text.split(%r{, })
@@ -81,6 +70,31 @@ Then /^(?:|I )should (not )?see the following movies: (.*)/ do |not_see, text|
     end
   end
 end
+
+Then /^(?:|I )should (not )?see all of the movies/ do |not_see|
+  movie_list = Movie.find(:all, :select => 'title', :group => 'title').collect{|m| m.title}
+  movie_list.each do |movie|
+    if not_see
+      if page.respond_to? :should
+        page.should have_no_content(movie)
+      else
+        assert page.has_no_content?(movie)
+      end
+    else
+      if page.respond_to? :should
+        page.should have_content(movie)
+      else
+        assert page.has_content?(movie)
+      end
+    end
+  end
+end
+
+
+When /^(?:|I )follow '([^"]*)'$/ do |link|
+  click_link(link)
+end
+
 
 And /^(?:|I )press on the homepage "([^"]*)"$/ do |button|
   if button == "Refresh"
